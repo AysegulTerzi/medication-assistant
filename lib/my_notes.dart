@@ -15,6 +15,8 @@ class _MyNotesPageState extends State<MyNotesPage> {
     _loadNotes();
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -201,8 +203,8 @@ String _formatTime(DateTime dateTime) {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Delete Note'),
-          content: Text('Are you sure you want to delete this note?'),
+          title: Text('delete Note'),
+          content: Text('Are you sure you want to delete this note ?'),
           actions: [
             TextButton(
               onPressed: () {
