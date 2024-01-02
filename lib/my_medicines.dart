@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Medicine {
   String name = '';
@@ -30,11 +31,17 @@ class _MyMedicinesPageState extends State<MyMedicinesPage> {
   TextEditingController startDateController = TextEditingController();
   TextEditingController estimatedEndDateController = TextEditingController();
   TextEditingController usesPerDayController = TextEditingController();
-  TextEditingController howToUseController = TextEditingController();
-  TextEditingController whenToUseController = TextEditingController();
 
   String selectedHowToUse = '';
   String selectedWhenToUse = '';
+
+  Medicine? selectedMedicine;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMedicines();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +49,10 @@ class _MyMedicinesPageState extends State<MyMedicinesPage> {
       appBar: AppBar(
         title: Text('My Medicines'),
       ),
-      body: _buildMedicinesList(),
+      body: Container(
+        margin: EdgeInsets.symmetric(horizontal: 16.0),
+        child: _buildMedicinesList(),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           _showAddMedicineDialog();
@@ -57,7 +67,7 @@ class _MyMedicinesPageState extends State<MyMedicinesPage> {
       itemCount: medicines.length,
       itemBuilder: (context, index) {
         return Card(
-          color: Colors.grey[200],
+          color: Color.fromARGB(255, 102, 222, 243),
           child: ListTile(
             onTap: () {
               _showMedicineDetails(medicines[index]);
@@ -69,6 +79,17 @@ class _MyMedicinesPageState extends State<MyMedicinesPage> {
                 Text('Start Date: ${medicines[index].startDate.toLocal()}'),
                 Text('How to Use: ${medicines[index].howToUse}'),
                 Text('When to Use: ${medicines[index].whenToUse}'),
+              ],
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: () {
+                    _deleteMedicine(index);
+                  },
+                ),
               ],
             ),
           ),
@@ -132,100 +153,91 @@ class _MyMedicinesPageState extends State<MyMedicinesPage> {
                   decoration: InputDecoration(labelText: 'Uses Per Day'),
                 ),
                 ListTile(
-  title: Text('How to Use'),
-  subtitle: Column(
-    children: [
-      RadioListTile(
-        title: Text('Full'),
-        value: 'Full',
-        groupValue: selectedHowToUse,
-        onChanged: (value) {
-          setState(() {
-            selectedHowToUse = value.toString();
-          });
-        },
-      ),
-      RadioListTile(
-        title: Text('Hungry'),
-        value: 'Hungry',
-        groupValue: selectedHowToUse,
-        onChanged: (value) {
-          setState(() {
-            selectedHowToUse = value.toString();
-          });
-        },
-      ),
-      RadioListTile(
-        title: Text("Doesn't Matter"),
-        value: "Doesn't Matter",
-        groupValue: selectedHowToUse,
-        onChanged: (value) {
-          setState(() {
-            selectedHowToUse = value.toString();
-          });
-        },
-      ),
-    ],
-  ),
-),
-ListTile(
-  title: Text('When to Use'),
-  subtitle: Column(
-    children: [
-      RadioListTile(
-        title: Text('Morning'),
-        value: 'Morning',
-        groupValue: selectedWhenToUse,
-        onChanged: (value) {
-          setState(() {
-            selectedWhenToUse = value.toString();
-          });
-        },
-      ),
-      RadioListTile(
-        title: Text('Afternoon'),
-        value: 'Afternoon',
-        groupValue: selectedWhenToUse,
-        onChanged: (value) {
-          setState(() {
-            selectedWhenToUse = value.toString();
-          });
-        },
-      ),
-      RadioListTile(
-        title: Text('Evening'),
-        value: 'Evening',
-        groupValue: selectedWhenToUse,
-        onChanged: (value) {
-          setState(() {
-            selectedWhenToUse = value.toString();
-          });
-        },
-      ),
-      RadioListTile(
-        title: Text('Night'),
-        value: 'Night',
-        groupValue: selectedWhenToUse,
-        onChanged: (value) {
-          setState(() {
-            selectedWhenToUse = value.toString();
-          });
-        },
-      ),
-      RadioListTile(
-        title: Text("Doesn't Matter"),
-        value: "Doesn't Matter",
-        groupValue: selectedWhenToUse,
-        onChanged: (value) {
-          setState(() {
-            selectedWhenToUse = value.toString();
-          });
-        },
-      ),
-    ],
-  ),
-),
-            
+                  title: Text('How to Use'),
+                  subtitle: Column(
+                    children: [
+                      CheckboxListTile(
+                        title: Text('Full'),
+                        value: selectedHowToUse == 'Full',
+                        onChanged: (bool? value) {
+                          setState(() {
+                            selectedHowToUse = value! ? 'Full' : '';
+                          });
+                        },
+                      ),
+                      CheckboxListTile(
+                        title: Text('Hungry'),
+                        value: selectedHowToUse == 'Hungry',
+                        onChanged: (bool? value) {
+                          setState(() {
+                            selectedHowToUse = value! ? 'Hungry' : '';
+                          });
+                        },
+                      ),
+                      CheckboxListTile(
+                        title: Text("Doesn't Matter"),
+                        value: selectedHowToUse == "Doesn't Matter",
+                        onChanged: (bool? value) {
+                          setState(() {
+                            selectedHowToUse = value! ? "Doesn't Matter" : '';
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                ListTile(
+                  title: Text('When to Use'),
+                  subtitle: Column(
+                    children: [
+                      CheckboxListTile(
+                        title: Text('Morning'),
+                        value: selectedWhenToUse == 'Morning',
+                        onChanged: (bool? value) {
+                          setState(() {
+                            selectedWhenToUse = value! ? 'Morning' : '';
+                          });
+                        },
+                      ),
+                      CheckboxListTile(
+                        title: Text('Afternoon'),
+                        value: selectedWhenToUse == 'Afternoon',
+                        onChanged: (bool? value) {
+                          setState(() {
+                            selectedWhenToUse = value! ? 'Afternoon' : '';
+                          });
+                        },
+                      ),
+                      CheckboxListTile(
+                        title: Text('Evening'),
+                        value: selectedWhenToUse == 'Evening',
+                        onChanged: (bool? value) {
+                          setState(() {
+                            selectedWhenToUse = value! ? 'Evening' : '';
+                          });
+                        },
+                      ),
+                      CheckboxListTile(
+                        title: Text('Night'),
+                        value: selectedWhenToUse == 'Night',
+                        onChanged: (bool? value) {
+                          setState(() {
+                            selectedWhenToUse = value! ? 'Night' : '';
+                          });
+                        },
+                      ),
+                      CheckboxListTile(
+                        title: Text("Doesn't Matter"),
+                        value: selectedWhenToUse == "Doesn't Matter",
+                        onChanged: (bool? value) {
+                          setState(() {
+                            selectedWhenToUse = value! ? "Doesn't Matter" : '';
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -263,10 +275,15 @@ ListTile(
 
     setState(() {
       medicines.add(newMedicine);
+      selectedHowToUse = '';
+      selectedWhenToUse = '';
+      _clearControllers();
+      _saveMedicines();
     });
   }
 
   void _showMedicineDetails(Medicine medicine) {
+    selectedMedicine = medicine;
     showDialog(
       context: context,
       builder: (context) {
@@ -294,5 +311,47 @@ ListTile(
         );
       },
     );
+  }
+
+  void _deleteMedicine(int index) {
+    setState(() {
+      medicines.removeAt(index);
+      _saveMedicines();
+    });
+  }
+
+  void _clearControllers() {
+    nameController.clear();
+    startDateController.clear();
+    estimatedEndDateController.clear();
+    usesPerDayController.clear();
+  }
+
+  void _saveMedicines() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> medicineList = medicines.map((med) => med.toString()).toList();
+    prefs.setStringList('medicines', medicineList);
+  }
+
+  void _loadMedicines() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? medicineList = prefs.getStringList('medicines');
+    if (medicineList != null) {
+      List<Medicine> loadedMedicines = medicineList.map((medStr) {
+        List<String> medProps = medStr.split(',');
+        return Medicine(
+          name: medProps[0],
+          startDate: DateTime.parse(medProps[1]),
+          estimatedEndDate: medProps[2].isEmpty ? null : DateTime.parse(medProps[2]),
+          usesPerDay: int.parse(medProps[3]),
+          howToUse: medProps[4],
+          whenToUse: medProps[5],
+        );
+      }).toList();
+
+      setState(() {
+        medicines = loadedMedicines;
+      });
+    }
   }
 }

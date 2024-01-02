@@ -110,14 +110,7 @@ class _ProfilePageState extends State<_ProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              _showEditDialog(context, userDataService);
-            },
-          ),
-        ],
+        
       ),
       body: Center(
         child: SingleChildScrollView(
