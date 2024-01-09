@@ -63,21 +63,21 @@ class Medicine {
     };
   }
 
-  // JSON Deserialization
-  factory Medicine.fromJson(Map<String, dynamic> json) {
-    return Medicine(
-      name: json['name'] ?? '',
-      type: MedicineType.values[json['type']] ?? MedicineType.Pill,
-      frequency: MedicineFrequency.values[json['frequency']] ??
-          MedicineFrequency.Daily,
-      howOften:
-          MedicineHowOften.values[json['howOften']] ?? MedicineHowOften.Once,
-      mealTime: MealTime.values[json['mealTime']] ?? MealTime.Anytime,
-      startDate:
-          DateTime.parse(json['startDate'] ?? DateTime.now().toIso8601String()),
-    );
+    // JSON Deserialization
+    factory Medicine.fromJson(Map<String, dynamic> json) {
+      return Medicine(
+        name: json['name'] ?? '',
+        type: MedicineType.values[json['type']] ?? MedicineType.Pill,
+        frequency: MedicineFrequency.values[json['frequency']] ??
+            MedicineFrequency.Daily,
+        howOften:
+            MedicineHowOften.values[json['howOften']] ?? MedicineHowOften.Once,
+        mealTime: MealTime.values[json['mealTime']] ?? MealTime.Anytime,
+        startDate:
+            DateTime.parse(json['startDate'] ?? DateTime.now().toIso8601String()),
+      );
+    }
   }
-}
 
 class MyMedicinesPage extends StatefulWidget {
   @override
