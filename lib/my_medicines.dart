@@ -1,8 +1,10 @@
+//my_medicines.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'my_schedule.dart';
 
 enum MedicineType {
   Pill,
@@ -37,6 +39,9 @@ class Medicine {
   MedicineHowOften howOften = MedicineHowOften.Once;
   MealTime mealTime = MealTime.Anytime;
   DateTime startDate = DateTime.now();
+  DateTime endDate = DateTime.now();
+  int? index;
+  bool taken = false;
 
   Medicine({
     required this.name,
@@ -45,13 +50,14 @@ class Medicine {
     required this.howOften,
     required this.mealTime,
     required this.startDate,
+    required this.endDate,
+    this.index,
   });
 
-  // JSON Serialization
   Map<String, dynamic> toJson() {
-    // Sıfırlanmış DateTime nesnesi oluştur
-    DateTime zeroedDateTime =
+    DateTime zeroedStartDate =
         DateTime(startDate.year, startDate.month, startDate.day);
+    DateTime zeroedEndDate = DateTime(endDate.year, endDate.month, endDate.day);
 
     return {
       'name': name,
@@ -59,25 +65,27 @@ class Medicine {
       'frequency': frequency.index,
       'howOften': howOften.index,
       'mealTime': mealTime.index,
-      'startDate': DateFormat('yyyy-MM-dd').format(zeroedDateTime),
+      'startDate': DateFormat('yyyy-MM-dd').format(zeroedStartDate),
+      'endDate': DateFormat('yyyy-MM-dd').format(zeroedEndDate),
     };
   }
 
-    // JSON Deserialization
-    factory Medicine.fromJson(Map<String, dynamic> json) {
-      return Medicine(
-        name: json['name'] ?? '',
-        type: MedicineType.values[json['type']] ?? MedicineType.Pill,
-        frequency: MedicineFrequency.values[json['frequency']] ??
-            MedicineFrequency.Daily,
-        howOften:
-            MedicineHowOften.values[json['howOften']] ?? MedicineHowOften.Once,
-        mealTime: MealTime.values[json['mealTime']] ?? MealTime.Anytime,
-        startDate:
-            DateTime.parse(json['startDate'] ?? DateTime.now().toIso8601String()),
-      );
-    }
+  factory Medicine.fromJson(Map<String, dynamic> json) {
+    return Medicine(
+      name: json['name'] ?? '',
+      type: MedicineType.values[json['type']] ?? MedicineType.Pill,
+      frequency: MedicineFrequency.values[json['frequency']] ??
+          MedicineFrequency.Daily,
+      howOften:
+          MedicineHowOften.values[json['howOften']] ?? MedicineHowOften.Once,
+      mealTime: MealTime.values[json['mealTime']] ?? MealTime.Anytime,
+      startDate:
+          DateTime.parse(json['startDate'] ?? DateTime.now().toIso8601String()),
+      endDate:
+          DateTime.parse(json['endDate'] ?? DateTime.now().toIso8601String()),
+    );
   }
+}
 
 class MyMedicinesPage extends StatefulWidget {
   @override
@@ -88,24 +96,35 @@ class _MyMedicinesPageState extends State<MyMedicinesPage> {
   List<Medicine> medicines = [];
   late SharedPreferences prefs;
 
+    void _navigateToSchedulePage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MySchedulePage(),
+      ),
+    );
+  }
   @override
   void initState() {
     super.initState();
     _loadMedicines();
+    
+
   }
+  
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Medicines'),
+        title: const Text('My Medicines'),
       ),
       body: _buildMedicinesList(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           _showAddMedicineDialog();
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -115,7 +134,7 @@ class _MyMedicinesPageState extends State<MyMedicinesPage> {
       itemCount: medicines.length,
       itemBuilder: (context, index) {
         return Slidable(
-          actionPane: SlidableDrawerActionPane(),
+          actionPane: const SlidableDrawerActionPane(),
           actionExtentRatio: 0.25,
           child: Card(
             color: Colors.grey[200],
@@ -136,6 +155,7 @@ class _MyMedicinesPageState extends State<MyMedicinesPage> {
                   Text(
                       'Meal Time: ${medicines[index].mealTime.toString().split('.').last}'),
                   Text('Start Date: ${medicines[index].startDate.toLocal()}'),
+                  Text('End Date: ${medicines[index].endDate.toLocal()}'),
                 ],
               ),
             ),
@@ -161,7 +181,13 @@ class _MyMedicinesPageState extends State<MyMedicinesPage> {
       MaterialPageRoute(
         builder: (context) => MedicineDetailsPage(
           onDetailsSubmitted: (newMedicine) {
-            _addMedicine(newMedicine);
+            if (newMedicine != null) {
+              if (newMedicine.index != null) {
+                _updateMedicine(newMedicine);
+              } else {
+                _addMedicine(newMedicine);
+              }
+            }
           },
         ),
       ),
@@ -170,10 +196,19 @@ class _MyMedicinesPageState extends State<MyMedicinesPage> {
 
   void _addMedicine(Medicine newMedicine) {
     setState(() {
+      newMedicine.index = medicines.length;
       medicines.add(newMedicine);
     });
 
-    // SharedPreferences ile ilaçları kaydetme
+    _saveMedicines();
+  }
+  
+
+  void _updateMedicine(Medicine updatedMedicine) {
+    setState(() {
+      medicines[updatedMedicine.index!] = updatedMedicine;
+    });
+
     _saveMedicines();
   }
 
@@ -182,7 +217,7 @@ class _MyMedicinesPageState extends State<MyMedicinesPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Medicine Details'),
+          title: const Text('Medicine Details'),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -195,6 +230,7 @@ class _MyMedicinesPageState extends State<MyMedicinesPage> {
               Text(
                   'Meal Time: ${medicine.mealTime.toString().split('.').last}'),
               Text('Start Date: ${medicine.startDate.toLocal()}'),
+              Text('End Date: ${medicine.endDate.toLocal()}'),
             ],
           ),
           actions: [
@@ -202,7 +238,14 @@ class _MyMedicinesPageState extends State<MyMedicinesPage> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Close'),
+              child: const Text('Close'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _editMedicine(medicine);
+              },
+              child: const Text('Update'),
             ),
           ],
         );
@@ -210,7 +253,6 @@ class _MyMedicinesPageState extends State<MyMedicinesPage> {
     );
   }
 
-  // SharedPreferences'ten ilaçları yükleme
   void _loadMedicines() async {
     prefs = await SharedPreferences.getInstance();
     List<String>? medicineStrings = prefs.getStringList('medicinesKey');
@@ -223,57 +265,78 @@ class _MyMedicinesPageState extends State<MyMedicinesPage> {
     }
   }
 
-  // SharedPreferences'e ilaçları kaydetme
   void _saveMedicines() {
     List<String> medicineStrings =
         medicines.map((medicine) => json.encode(medicine.toJson())).toList();
     prefs.setStringList('medicinesKey', medicineStrings);
   }
 
-  // İlaç silme işlemi
   void _deleteMedicine(int index) {
     setState(() {
       medicines.removeAt(index);
     });
 
-    // SharedPreferences ile güncel ilaçları kaydetme
     _saveMedicines();
+  }
+
+  void _editMedicine(Medicine medicine) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MedicineDetailsPage(
+          onDetailsSubmitted: (updatedMedicine) {
+            if (updatedMedicine != null) {
+              _updateMedicine(updatedMedicine);
+            }
+          },
+          initialMedicine: medicine,
+        ),
+      ),
+    );
   }
 }
 
 class MedicineDetailsPage extends StatefulWidget {
-  final Function(Medicine) onDetailsSubmitted;
+  final Function(Medicine?) onDetailsSubmitted;
+  final Medicine? initialMedicine;
 
-  MedicineDetailsPage({required this.onDetailsSubmitted});
+  MedicineDetailsPage({required this.onDetailsSubmitted, this.initialMedicine});
 
   @override
   _MedicineDetailsPageState createState() => _MedicineDetailsPageState();
 }
 
 class _MedicineDetailsPageState extends State<MedicineDetailsPage> {
-  late String medicineName;
-  late MedicineType selectedType;
-  late MedicineFrequency selectedFrequency;
-  late MedicineHowOften selectedHowOften;
-  late MealTime selectedMealTime;
-  late DateTime selectedStartDate;
+  late TextEditingController _nameController;
+  late MedicineType _selectedType;
+  late MedicineFrequency _selectedFrequency;
+  late MedicineHowOften _selectedHowOften;
+  late MealTime _selectedMealTime;
+  late DateTime _selectedStartDate;
+  late DateTime _selectedEndDate;
 
   @override
   void initState() {
     super.initState();
-    medicineName = '';
-    selectedType = MedicineType.Pill;
-    selectedFrequency = MedicineFrequency.Daily;
-    selectedHowOften = MedicineHowOften.Once;
-    selectedMealTime = MealTime.Anytime;
-    selectedStartDate = DateTime.now();
+
+    _nameController = TextEditingController(text: widget.initialMedicine?.name);
+    _selectedType = widget.initialMedicine?.type ?? MedicineType.Pill;
+    _selectedFrequency =
+        widget.initialMedicine?.frequency ?? MedicineFrequency.Daily;
+    _selectedHowOften =
+        widget.initialMedicine?.howOften ?? MedicineHowOften.Once;
+    _selectedMealTime = widget.initialMedicine?.mealTime ?? MealTime.Anytime;
+    _selectedStartDate = widget.initialMedicine?.startDate ?? DateTime.now();
+    _selectedEndDate = widget.initialMedicine?.endDate ?? DateTime.now();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Medicine'),
+        title: Text(widget.initialMedicine != null
+            ? 'Update Medicine'
+            : 'Add Medicine'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -281,116 +344,149 @@ class _MedicineDetailsPageState extends State<MedicineDetailsPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             TextField(
+              controller: _nameController,
               onChanged: (value) {
-                setState(() {
-                  medicineName = value;
-                });
+                // Handle name changes if needed
               },
-              decoration: InputDecoration(labelText: 'Medicine Name'),
+              decoration: const InputDecoration(labelText: 'Medicine Name'),
             ),
-            DropdownButtonFormField<MedicineType>(
-              value: selectedType,
+            _buildDropdown<MedicineType>(
+              value: _selectedType,
               onChanged: (value) {
                 setState(() {
-                  selectedType = value!;
+                  _selectedType = value!;
                 });
               },
-              items: MedicineType.values.map((type) {
-                return DropdownMenuItem(
-                  value: type,
-                  child: Text(type.toString().split('.').last),
-                );
-              }).toList(),
-              decoration: InputDecoration(labelText: 'Medicine Type'),
+              items: MedicineType.values,
+              labelText: 'Medicine Type',
             ),
-            DropdownButtonFormField<MedicineFrequency>(
-              value: selectedFrequency,
+            _buildDropdown<MedicineFrequency>(
+              value: _selectedFrequency,
               onChanged: (value) {
                 setState(() {
-                  selectedFrequency = value!;
+                  _selectedFrequency = value!;
                 });
               },
-              items: MedicineFrequency.values.map((frequency) {
-                return DropdownMenuItem(
-                  value: frequency,
-                  child: Text(frequency.toString().split('.').last),
-                );
-              }).toList(),
-              decoration: InputDecoration(labelText: 'Medicine Frequency'),
+              items: MedicineFrequency.values,
+              labelText: 'Medicine Frequency',
             ),
-            DropdownButtonFormField<MedicineHowOften>(
-              value: selectedHowOften,
+            _buildDropdown<MedicineHowOften>(
+              value: _selectedHowOften,
               onChanged: (value) {
                 setState(() {
-                  selectedHowOften = value!;
+                  _selectedHowOften = value!;
                 });
               },
-              items: MedicineHowOften.values.map((howOften) {
-                return DropdownMenuItem(
-                  value: howOften,
-                  child: Text(howOften.toString().split('.').last),
-                );
-              }).toList(),
-              decoration: InputDecoration(labelText: 'How Often'),
+              items: MedicineHowOften.values,
+              labelText: 'How Often',
             ),
-            DropdownButtonFormField<MealTime>(
-              value: selectedMealTime,
+            _buildDropdown<MealTime>(
+              value: _selectedMealTime,
               onChanged: (value) {
                 setState(() {
-                  selectedMealTime = value!;
+                  _selectedMealTime = value!;
                 });
               },
-              items: MealTime.values.map((mealTime) {
-                return DropdownMenuItem(
-                  value: mealTime,
-                  child: Text(mealTime.toString().split('.').last),
-                );
-              }).toList(),
-              decoration: InputDecoration(labelText: 'Meal Time'),
+              items: MealTime.values,
+              labelText: 'Meal Time',
             ),
             Row(
               children: [
-                Text('Start Date: '),
+                const Text('Start Date: '),
                 TextButton(
                   onPressed: () async {
                     DateTime? pickedDate = await showDatePicker(
                       context: context,
-                      initialDate: selectedStartDate,
+                      initialDate: _selectedStartDate,
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2101),
                     );
-                    if (pickedDate != null && pickedDate != selectedStartDate) {
+                    if (pickedDate != null &&
+                        pickedDate != _selectedStartDate) {
                       setState(() {
-                        selectedStartDate = pickedDate;
+                        _selectedStartDate = pickedDate;
                       });
                     }
                   },
                   child: Text(
-                    '${selectedStartDate.toLocal()}'.split(' ')[0],
-                    style: TextStyle(color: Colors.blue),
+                    '${_selectedStartDate.toLocal()}'.split(' ')[0],
+                    style: const TextStyle(color: Colors.blue),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 16.0),
+            Row(
+              children: [
+                const Text('End Date: '),
+                TextButton(
+                  onPressed: () async {
+                    DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: _selectedEndDate,
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2101),
+                    );
+                    if (pickedDate != null && pickedDate != _selectedEndDate) {
+                      setState(() {
+                        _selectedEndDate = pickedDate;
+                      });
+                    }
+                  },
+                  child: Text(
+                    '${_selectedEndDate.toLocal()}'.split(' ')[0],
+                    style: const TextStyle(color: Colors.blue),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () {
                 final newMedicine = Medicine(
-                  name: medicineName,
-                  type: selectedType,
-                  frequency: selectedFrequency,
-                  howOften: selectedHowOften,
-                  mealTime: selectedMealTime,
-                  startDate: selectedStartDate,
+                  name: _nameController.text,
+                  type: _selectedType,
+                  frequency: _selectedFrequency,
+                  howOften: _selectedHowOften,
+                  mealTime: _selectedMealTime,
+                  startDate: _selectedStartDate,
+                  endDate: _selectedEndDate,
+                  index: widget.initialMedicine?.index,
                 );
                 widget.onDetailsSubmitted(newMedicine);
                 Navigator.pop(context);
               },
-              child: Text('Add Medicine'),
+              child: Text(widget.initialMedicine != null
+                  ? 'Update Medicine'
+                  : 'Add Medicine'),
             ),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildDropdown<T>({
+    required T value,
+    required void Function(T?) onChanged,
+    required List<T> items,
+    required String labelText,
+  }) {
+    return DropdownButtonFormField<T>(
+      value: value,
+      onChanged: onChanged,
+      items: items.map((item) {
+        return DropdownMenuItem(
+          value: item,
+          child: Text(item.toString().split('.').last),
+        );
+      }).toList(),
+      decoration: InputDecoration(labelText: labelText),
+    );
+  }
+}
+
+void main() {
+  runApp(MaterialApp(
+    home: MyMedicinesPage(),
+  ));
 }
