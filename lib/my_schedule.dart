@@ -15,27 +15,47 @@ class SelectedMedicinesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Colors.grey[200],
-      child: ListTile(
-        title: Text('Medicines you have to take on this day:'),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: selectedMedicines
-              .map((medicine) => Text(
-                    '${medicine.name}, ${medicine.type.toString().split('.').last}',
-                  ))
-              .toList(),
+  return Card(
+    color: Colors.grey[200],
+    child: ListTile(
+      dense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      
+      title: const Text(
+        'Medicines you have to take on this day:',
+        style: TextStyle(fontWeight: FontWeight.bold,color: Colors.blue)
+
+      ),
+      subtitle: SizedBox(
+        height: 200, // Set a fixed height for the ListView
+        child: ListView.builder(
+          itemCount: selectedMedicines.length,
+          itemBuilder: (context, index) {
+            Medicine medicine = selectedMedicines[index];
+
+            return Card(
+              color: Colors.grey[100],
+              child: ListTile(
+                title: Text(
+                  '${'You have to take'} ${medicine.name.toLowerCase()} ${medicine.howOften.toString().split('.').last.toLowerCase()} ${'in this day, you can take it'} ${medicine.mealTime.toString().split('.').last.toLowerCase()}',
+                  style: const TextStyle(fontWeight: FontWeight.normal),
+                ),
+              ),
+            );
+          },
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 }
 
 class _MySchedulesPageState extends State<MySchedulePage> {
+  
   List<Medicine> medicines = [];
   late Map<DateTime, List<Medicine>> events;
-  DateTime selectedDate = DateTime.now(); // Track the selected date
+  DateTime selectedDate = DateTime.now(); 
 
   @override
   void initState() {
@@ -47,7 +67,7 @@ class _MySchedulesPageState extends State<MySchedulePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Schedules'),
+        title: const Text('My Schedules'),
       ),
       body: Column(
         children: [
@@ -65,22 +85,15 @@ class _MySchedulesPageState extends State<MySchedulePage> {
       focusedDay: DateTime.now(),
       firstDay: DateTime(2000),
       lastDay: DateTime(2101),
-      calendarFormat: CalendarFormat.month,
-      headerStyle: HeaderStyle(
-        formatButtonTextStyle: TextStyle().copyWith(color: Colors.white),
-        formatButtonDecoration: BoxDecoration(
-          color: Colors.blue,
-          borderRadius: BorderRadius.circular(16.0),
-        ),
-      ),
       onDaySelected: (selectedDay, focusedDay) {
         setState(() {
-          // Update the selected date
           selectedDate = selectedDay;
         });
       },
     );
   }
+
+
 
   Widget _buildSelectedMedicinesCard() {
     return SelectedMedicinesCard(selectedMedicines: _updateDisplayedMedicines(selectedDate));
@@ -123,7 +136,7 @@ class _MySchedulesPageState extends State<MySchedulePage> {
         events[startDate] = events[startDate] ?? [];
         events[startDate]!.add(medicine);
 
-        startDate = startDate.add(Duration(days: 1));
+        startDate = startDate.add(const Duration(days: 1));
       }
     }
 

@@ -55,6 +55,20 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
   TextEditingController searchController = TextEditingController();
   bool sortByDate = true;
 
+  List<String> doctorNames = [
+    'Prof. Dr. Gazi Yaşargil',
+    'Prof. Dr. Münci Kalayoğlu',
+    'Prof. Dr. Ömer Özkan',
+    'Prof. Dr. Hande Özdinler',
+  ];
+
+  List<String> hospitalNames = [
+    'Eskişehir Şehir Hastanesi',
+    'Yunus Emre Devlet Hastanesi',
+    'Çifteler Devlet Hastanesi',
+    'Sivrihisar Devlet Hastanesi',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -129,9 +143,12 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Visit Date: ${filteredAppointments[index].visitDate.toLocal()}'),
-                Text('Hospital Visited: ${filteredAppointments[index].hospitalVisited}'),
-                Text('Medicines Taken: ${filteredAppointments[index].medicinesTaken}'),
+                Text(
+                    'Visit Date: ${filteredAppointments[index].visitDate.toLocal()}'),
+                Text(
+                    'Hospital Visited: ${filteredAppointments[index].hospitalVisited}'),
+                Text(
+                    'Medicines Taken: ${filteredAppointments[index].medicinesTaken}'),
               ],
             ),
             trailing: Row(
@@ -155,13 +172,30 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
     showDialog(
       context: context,
       builder: (context) {
+        String selectedDoctor =
+            doctorNames[0]; // Initialize with the first doctor
+        String selectedHospital =
+            hospitalNames[0]; // Initialize with the first hospital
+
         return AlertDialog(
           title: Text('Add Appointment'),
           content: SingleChildScrollView(
             child: Column(
               children: [
-                TextField(
-                  controller: doctorNameController,
+                DropdownButtonFormField<String>(
+                  value: selectedDoctor,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedDoctor = newValue!;
+                    });
+                  },
+                  items:
+                      doctorNames.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
                   decoration: InputDecoration(labelText: 'Doctor Name'),
                 ),
                 TextField(
@@ -182,8 +216,20 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
                     }
                   },
                 ),
-                TextField(
-                  controller: hospitalController,
+                DropdownButtonFormField<String>(
+                  value: selectedHospital,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedHospital = newValue!;
+                    });
+                  },
+                  items: hospitalNames
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
                   decoration: InputDecoration(labelText: 'Hospital Visited'),
                 ),
                 TextField(
@@ -202,6 +248,10 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
             ),
             TextButton(
               onPressed: () {
+                setState(() {
+                  doctorNameController.text = selectedDoctor;
+                  hospitalController.text = selectedHospital;
+                });
                 _addAppointment();
                 Navigator.pop(context);
               },
@@ -255,7 +305,8 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
     List<String>? appointmentStrings = prefs.getStringList('appointmentsKey');
 
     if (appointmentStrings != null) {
-      List<Appointment> loadedAppointments = appointmentStrings.map((appointmentStr) {
+      List<Appointment> loadedAppointments =
+          appointmentStrings.map((appointmentStr) {
         return Appointment.fromJson(appointmentStr);
       }).toList();
 
