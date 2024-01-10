@@ -133,7 +133,9 @@ class _MyMedicinesPageState extends State<MyMedicinesPage> {
     return ListView.builder(
       itemCount: medicines.length,
       itemBuilder: (context, index) {
-        return Slidable(
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 8.0),
+        child: Slidable(
           actionPane: const SlidableDrawerActionPane(),
           actionExtentRatio: 0.25,
           child: Card(
@@ -170,6 +172,8 @@ class _MyMedicinesPageState extends State<MyMedicinesPage> {
               },
             ),
           ],
+        
+        )
         );
       },
     );
