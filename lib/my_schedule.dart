@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'my_medicines.dart';
-import 'dart:convert';  // Eklenen kısım
+import 'dart:convert';  
 
 class MySchedulePage extends StatefulWidget {
   @override
@@ -27,7 +27,7 @@ class SelectedMedicinesCard extends StatelessWidget {
 
       ),
       subtitle: SizedBox(
-        height: 200, // Set a fixed height for the ListView
+        height: 200, 
         child: ListView.builder(
           itemCount: selectedMedicines.length,
           itemBuilder: (context, index) {
@@ -100,12 +100,10 @@ class _MySchedulesPageState extends State<MySchedulePage> {
   }
 
   List<Medicine> _updateDisplayedMedicines(DateTime selectedDay) {
-    // Convert selectedDay to midnight (00:00:00)
     DateTime selectedDayMidnight = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
 
     List<Medicine> selectedDayMedicines = events[selectedDayMidnight] ?? [];
 
-    // Print the selected medicines with a more readable date format
     print('Selected Medicines for ${selectedDay.toLocal()}: $selectedDayMedicines');
 
     // Update the selected medicines

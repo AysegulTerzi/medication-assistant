@@ -173,9 +173,9 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
       context: context,
       builder: (context) {
         String selectedDoctor =
-            doctorNames[0]; // Initialize with the first doctor
+            doctorNames[0]; 
         String selectedHospital =
-            hospitalNames[0]; // Initialize with the first hospital
+            hospitalNames[0]; 
 
         return AlertDialog(
           title: Text('Add Appointment'),

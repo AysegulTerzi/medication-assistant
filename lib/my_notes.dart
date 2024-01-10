@@ -35,7 +35,7 @@ class _MyNotesPageState extends State<MyNotesPage> {
 
   Widget _buildNotesList() {
   return Container(
-    margin: EdgeInsets.all(20.0), // Set your desired margin
+    margin: EdgeInsets.all(20.0),
     child: Padding(
       padding: const EdgeInsets.all(8.0),
       child: GridView.builder(
@@ -57,7 +57,7 @@ class _MyNotesPageState extends State<MyNotesPage> {
 Widget _buildNoteCard(String note) {
   List<String> noteLines = note.split('\n');
   String noteText = noteLines[0];
-  String dateTime = noteLines.length > 1 ? noteLines[1] : ''; // Extract date if available
+  String dateTime = noteLines.length > 1 ? noteLines[1] : '';
 
   return Card(
     child: Padding(
@@ -228,7 +228,6 @@ String _formatTime(DateTime dateTime) {
     );
   }
 
-  // Load notes from shared preferences
   void _loadNotes() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -236,7 +235,6 @@ String _formatTime(DateTime dateTime) {
     });
   }
 
-  // Save notes to shared preferences
   void _saveNotes() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setStringList('notesKey', notes);

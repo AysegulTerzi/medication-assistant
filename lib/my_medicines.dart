@@ -346,7 +346,7 @@ class _MedicineDetailsPageState extends State<MedicineDetailsPage> {
             TextField(
               controller: _nameController,
               onChanged: (value) {
-                // Handle name changes if needed
+              
               },
               decoration: const InputDecoration(labelText: 'Medicine Name'),
             ),

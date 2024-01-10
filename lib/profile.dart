@@ -118,7 +118,7 @@ class _ProfilePageState extends State<_ProfilePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Profil fotoğrafı
+            
               const Stack(
                 alignment: Alignment.bottomRight,
                 children: [
@@ -134,10 +134,8 @@ class _ProfilePageState extends State<_ProfilePage> {
                 ],
               ),
               const SizedBox(height: 16),
-              // User Name
               Text('${userDataService.userName}', style: const TextStyle(fontSize: 18)),
               const SizedBox(height: 16),
-              // Other information presented in cards
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
