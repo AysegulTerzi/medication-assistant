@@ -18,7 +18,7 @@ class SelectedMedicinesCard extends StatelessWidget {
     return Card(
       color: Colors.grey[200],
       child: ListTile(
-        title: Text('Selected Medicines'),
+        title: Text('Medicines you have to take on this day:'),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: selectedMedicines
@@ -35,6 +35,7 @@ class SelectedMedicinesCard extends StatelessWidget {
 class _MySchedulesPageState extends State<MySchedulePage> {
   List<Medicine> medicines = [];
   late Map<DateTime, List<Medicine>> events;
+  DateTime selectedDate = DateTime.now(); // Track the selected date
 
   @override
   void initState() {
@@ -59,73 +60,44 @@ class _MySchedulesPageState extends State<MySchedulePage> {
     );
   }
 
-Widget _buildCalendar() {
-  return TableCalendar(
-    focusedDay: DateTime.now(),
-    firstDay: DateTime(2000),
-    lastDay: DateTime(2101),
-    calendarFormat: CalendarFormat.month,
-    headerStyle: HeaderStyle(
-      formatButtonTextStyle: TextStyle().copyWith(color: Colors.white),
-      formatButtonDecoration: BoxDecoration(
-        color: Colors.blue,
-        borderRadius: BorderRadius.circular(16.0),
+  Widget _buildCalendar() {
+    return TableCalendar(
+      focusedDay: DateTime.now(),
+      firstDay: DateTime(2000),
+      lastDay: DateTime(2101),
+      calendarFormat: CalendarFormat.month,
+      headerStyle: HeaderStyle(
+        formatButtonTextStyle: TextStyle().copyWith(color: Colors.white),
+        formatButtonDecoration: BoxDecoration(
+          color: Colors.blue,
+          borderRadius: BorderRadius.circular(16.0),
+        ),
       ),
-    ),
-    onDaySelected: (selectedDay, focusedDay) {
-      setState(() {
-        // Update the displayed medicines based on the selected day
-        _updateDisplayedMedicines(selectedDay);
-      });
-    },
-  );
-}
+      onDaySelected: (selectedDay, focusedDay) {
+        setState(() {
+          // Update the selected date
+          selectedDate = selectedDay;
+        });
+      },
+    );
+  }
 
-List<Medicine> _updateDisplayedMedicines(DateTime selectedDay) {
-  // Convert selectedDay to midnight (00:00:00)
-  DateTime selectedDayMidnight = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
+  Widget _buildSelectedMedicinesCard() {
+    return SelectedMedicinesCard(selectedMedicines: _updateDisplayedMedicines(selectedDate));
+  }
 
-  List<Medicine> selectedDayMedicines = events[selectedDayMidnight] ?? [];
+  List<Medicine> _updateDisplayedMedicines(DateTime selectedDay) {
+    // Convert selectedDay to midnight (00:00:00)
+    DateTime selectedDayMidnight = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
 
-  // Print the selected medicines with a more readable date format
-  print('Selected Medicines for ${selectedDay.toLocal()}: $selectedDayMedicines');
-  
-  // Update the selected medicines
-  return selectedDayMedicines;
+    List<Medicine> selectedDayMedicines = events[selectedDayMidnight] ?? [];
 
-}
+    // Print the selected medicines with a more readable date format
+    print('Selected Medicines for ${selectedDay.toLocal()}: $selectedDayMedicines');
 
-Widget _buildSelectedMedicinesCard() {
-  return SelectedMedicinesCard(selectedMedicines: _updateDisplayedMedicines(DateTime.now()));
-}
-
-
-
-  // Widget _buildSchedulesList() {
-  //   return ListView.builder(
-  //     itemCount: medicines.length,
-  //     itemBuilder: (context, index) {
-  //       return Card(
-  //         color: Colors.grey[200],
-  //         child: ListTile(
-  //           title: Text(medicines[index].name),
-  //           subtitle: Column(
-  //             crossAxisAlignment: CrossAxisAlignment.start,
-  //             children: [
-  //               Text('Type: ${medicines[index].type.toString().split('.').last}'),
-  //               Text('Frequency: ${medicines[index].frequency.toString().split('.').last}'),
-  //               Text('How Often: ${medicines[index].howOften.toString().split('.').last}'),
-  //               Text('Meal Time: ${medicines[index].mealTime.toString().split('.').last}'),
-  //               Text('Start Date: ${medicines[index].startDate.toLocal()}'),
-  //               Text('End Date: ${medicines[index].endDate.toLocal()}'),
-  //             ],
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
+    // Update the selected medicines
+    return selectedDayMedicines;
+  }
 
   void _loadMedicines() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
