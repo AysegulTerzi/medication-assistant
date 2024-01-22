@@ -17,8 +17,8 @@ flutter run
 
 ```
 
-![picture alt](https://github.com/AysegulTerzi/OpenGL-functions/blob/main/depthmaskwin.png)
-
+![picture alt](ss/4.png) ![picture alt](ss/1.png)
+![picture alt](ss/2.png) ![picture alt](ss/3.png)
 
 If you have a suggestion for us, please feel free to share it !
 * terziaysegul9696@gmail.com
