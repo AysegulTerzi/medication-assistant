@@ -1,16 +1,26 @@
-# medicineapp
+# Medication Assistant
 
-A new Flutter project.
+This is a Flutter project.
 
-## Getting Started
+## Main Objective
 
-This project is a starting point for a Flutter application.
+You've seen medication tracking apps, almost all of them can help you control your medication manually, but they don't promise you an automatic schedule. This is exactly what we aimed to do with this application. After you enter your medication, the way you use it, the frequency of use, the time you start and stop taking it, it creates an automatic schedule for you and makes your medication tracking easier. There are also pages where you can list and search your doctor appointments and take notes about your health status. 
 
-A few resources to get you started if this is your first Flutter project:
+There are many features that we aim to add to our app, one of them is an artificial intelligence that calculates the risk of heart attack based on your health status. 
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+#### You can easily run this project by entering the commands shown in the example below into your terminal:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```python
+git clone https://github.com/AysegulTerzi/medication-assistant.git
+flutter doctor
+flutter run
+
+```
+
+![picture alt](https://github.com/AysegulTerzi/OpenGL-functions/blob/main/depthmaskwin.png)
+
+
+If you have a suggestion for us, please feel free to share it !
+* terziaysegul9696@gmail.com
+* https://www.linkedin.com/in/aysegul-terzi/
+
